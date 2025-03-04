@@ -6,18 +6,22 @@ import './Cart.css';
 const Cart = ({ isOpen, onClose }) => {
   const { cart, removeFromCart, updateQuantity, getTotal } = useCart();
   const [isAnimating, setIsAnimating] = useState(false);
+  const [animatingItemId, setAnimatingItemId] = useState(null);
   const navigate = useNavigate();
 
-  const handleQuantityChange = (productId, newQuantity) => {
-    if (newQuantity < 1) return;
-    updateQuantity(productId, newQuantity);
+  const handleQuantityChange = (itemId, newQuantity) => {
+    if (newQuantity >= 1) {
+      updateQuantity(itemId, newQuantity);
+    }
   };
 
-  const handleRemoveItem = (productId) => {
+  const handleRemoveItem = (itemId) => {
     setIsAnimating(true);
+    setAnimatingItemId(itemId);
     setTimeout(() => {
-      removeFromCart(productId);
+      removeFromCart(itemId);
       setIsAnimating(false);
+      setAnimatingItemId(null);
     }, 300);
   };
 
@@ -29,11 +33,11 @@ const Cart = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="cart-overlay">
-      <div className="cart-container">
+    <div className="cart-overlay" onClick={onClose}>
+      <div className="cart-container" onClick={e => e.stopPropagation()}>
         <div className="cart-header">
           <h2>Seu Carrinho</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+          <button className="close-button" onClick={onClose}>&times;</button>
         </div>
         
         {cart.length === 0 ? (
@@ -47,36 +51,41 @@ const Cart = ({ isOpen, onClose }) => {
           <>
             <div className="cart-items">
               {cart.map((item) => (
-                <div key={item.id} className={`cart-item ${isAnimating ? 'removing' : ''}`}>
+                <div 
+                  key={item.id} 
+                  className={`cart-item ${animatingItemId === item.id && isAnimating ? 'removing' : ''}`}
+                >
                   <img
-                    src={`https://strapi-products.onrender.com${item.image}`}
+                    src={item.image || 'https://via.placeholder.com/100x100?text=Sem+Imagem'}
                     alt={item.title}
                     className="cart-item-image"
                   />
                   <div className="cart-item-details">
                     <h3>{item.title}</h3>
-                    <p className="cart-item-price">R$ {item.price.toFixed(2)}</p>
+                    <div className="cart-item-price">
+                      R$ {(item.price * item.quantity).toFixed(2)}
+                    </div>
                     <div className="cart-item-quantity">
-                      <button
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                      <button 
                         className="quantity-button"
+                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                       >
                         -
                       </button>
                       <span>{item.quantity}</span>
-                      <button
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                      <button 
                         className="quantity-button"
+                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                       >
                         +
                       </button>
                     </div>
                   </div>
-                  <button
-                    className="remove-item"
+                  <button 
+                    className="remove-button"
                     onClick={() => handleRemoveItem(item.id)}
                   >
-                    ×
+                    &times;
                   </button>
                 </div>
               ))}
@@ -86,7 +95,10 @@ const Cart = ({ isOpen, onClose }) => {
                 <span>Total:</span>
                 <span>R$ {getTotal().toFixed(2)}</span>
               </div>
-              <button onClick={handleCheckout} className="checkout-button">
+              <button 
+                className="checkout-button"
+                onClick={handleCheckout}
+              >
                 Finalizar Compra
               </button>
             </div>

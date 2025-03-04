@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Notification from './Notification';
+import { STRAPI_URL } from '../config';
 import './Products.css';
 
 const Products = ({ showFilters = false }) => {
@@ -19,8 +20,10 @@ const Products = ({ showFilters = false }) => {
   useEffect(() => {
     const fetchProdutos = async () => {
       try {
-        const response = await fetch('https://strapi-products.onrender.com/api/produtos?populate=*');
+        const response = await fetch('https://certain-dinosaur-423c97af88.strapiapp.com/api/produtos?populate=*');
         const data = await response.json();
+        console.log('Dados do produto:', data.data[0]);
+        console.log('URL da imagem:', data.data[0]?.attributes?.imagemPrincipal?.data?.attributes?.url);
         if (data && data.data) {
           setProdutos(data.data);
           setFilteredProdutos(data.data);
@@ -117,7 +120,18 @@ const Products = ({ showFilters = false }) => {
       if (!produto?.attributes?.imagemPrincipal?.data?.attributes?.url) {
         return 'https://via.placeholder.com/300x300?text=Sem+Imagem';
       }
-      return `https://strapi-products.onrender.com${produto.attributes.imagemPrincipal.data.attributes.url}`;
+      const imageUrl = produto.attributes.imagemPrincipal.data.attributes.url;
+      console.log('URL original:', imageUrl);
+      // Se a URL já contém o domínio completo do Strapi Media
+      if (imageUrl.includes('media.strapiapp.com')) {
+        return imageUrl;
+      }
+      // Se a URL começa com http mas não é do media.strapiapp.com
+      if (imageUrl.startsWith('http')) {
+        return imageUrl;
+      }
+      // Para URLs relativas
+      return `https://certain-dinosaur-423c97af88.media.strapiapp.com${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
     } catch (error) {
       console.error('Erro ao processar URL da imagem:', error);
       return 'https://via.placeholder.com/300x300?text=Sem+Imagem';

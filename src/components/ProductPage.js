@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Notification from './Notification';
-import { STRAPI_URL } from '../config';
 import './ProductPage.css';
 
 const ProductPage = () => {
@@ -18,7 +17,7 @@ const ProductPage = () => {
   useEffect(() => {
     const fetchProduto = async () => {
       try {
-        const response = await fetch(`${STRAPI_URL}/api/produtos/${id}?populate=*`);
+        const response = await fetch(`https://certain-dinosaur-423c97af88.strapiapp.com/api/produtos/${id}?populate=*`);
         const data = await response.json();
         if (data && data.data) {
           setProduto(data.data);
@@ -74,7 +73,18 @@ const ProductPage = () => {
       if (!imagemPrincipal?.data?.attributes?.url) {
         return 'https://via.placeholder.com/600x600?text=Sem+Imagem';
       }
-      return `${STRAPI_URL}${imagemPrincipal.data.attributes.url}`;
+      const imageUrl = imagemPrincipal.data.attributes.url;
+      console.log('URL original:', imageUrl);
+      // Se a URL já contém o domínio completo do Strapi Media
+      if (imageUrl.includes('media.strapiapp.com')) {
+        return imageUrl;
+      }
+      // Se a URL começa com http mas não é do media.strapiapp.com
+      if (imageUrl.startsWith('http')) {
+        return imageUrl;
+      }
+      // Para URLs relativas
+      return `https://certain-dinosaur-423c97af88.media.strapiapp.com${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
     } catch (error) {
       console.error('Erro ao processar URL da imagem:', error);
       return 'https://via.placeholder.com/600x600?text=Sem+Imagem';
@@ -104,7 +114,9 @@ const ProductPage = () => {
                 {produto.attributes.imagemDetalhes.data.map((imagem) => (
                   <div key={imagem.id} className="product-page-gallery-item">
                     <img
-                      src={`${STRAPI_URL}${imagem.attributes.url}`}
+                      src={imagem.attributes.url.includes('media.strapiapp.com') 
+                        ? imagem.attributes.url 
+                        : `https://certain-dinosaur-423c97af88.media.strapiapp.com${imagem.attributes.url.startsWith('/') ? '' : '/'}${imagem.attributes.url}`}
                       alt={`${produto.attributes.tituleProduto} - Detalhe`}
                       className="product-page-gallery-image"
                     />

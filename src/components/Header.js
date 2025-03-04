@@ -14,8 +14,19 @@ const Header = () => {
 
   useEffect(() => {
     const fetchHeaderData = async () => {
-      const data = await getHeaderData();
-      setHeaderData(data[0]?.attributes); 
+      try {
+        const data = await getHeaderData();
+        // Verifica se data existe e tem pelo menos um item antes de acessar attributes
+        if (data && data.length > 0) {
+          setHeaderData(data[0]?.attributes);
+        } else {
+          console.log('Nenhum dado de header encontrado');
+          setHeaderData({}); // Define um objeto vazio como fallback
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados do header:', error);
+        setHeaderData({}); // Define um objeto vazio em caso de erro
+      }
     };
     fetchHeaderData();
   }, []);
@@ -26,8 +37,7 @@ const Header = () => {
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
-  if (!headerData) return <p>Carregando...</p>;
-
+  // Remove o loading state já que temos um fallback
   return (
     <>
       <header className="header">

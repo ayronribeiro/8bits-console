@@ -1,106 +1,95 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
 
-const cartReducer = (state, action) => {
-  switch (action.type) {
-    case 'ADD_TO_CART':
-      const existingItem = state.items.find(item => item.id === action.payload.id);
-      if (existingItem) {
-        return {
-          ...state,
-          items: state.items.map(item =>
-            item.id === action.payload.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          ),
-        };
-      }
-      return {
-        ...state,
-        items: [...state.items, { ...action.payload, quantity: 1 }],
-      };
-
-    case 'REMOVE_FROM_CART':
-      return {
-        ...state,
-        items: state.items.filter(item => item.id !== action.payload),
-      };
-
-    case 'UPDATE_QUANTITY':
-      return {
-        ...state,
-        items: state.items.map(item =>
-          item.id === action.payload.id
-            ? { ...item, quantity: action.payload.quantity }
-            : item
-        ),
-      };
-
-    case 'CLEAR_CART':
-      return {
-        ...state,
-        items: [],
-      };
-
-    default:
-      return state;
+const getImageUrl = (product) => {
+  try {
+    const imageUrl = product.attributes.imagemPrincipal?.data?.attributes?.url;
+    if (!imageUrl) {
+      return 'https://via.placeholder.com/100x100?text=Sem+Imagem';
+    }
+    console.log('URL original no carrinho:', imageUrl);
+    // Se a URL já contém o domínio completo do Strapi Media
+    if (imageUrl.includes('media.strapiapp.com')) {
+      return imageUrl;
+    }
+    // Se a URL começa com http mas não é do media.strapiapp.com
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    // Para URLs relativas
+    return `https://certain-dinosaur-423c97af88.media.strapiapp.com${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+  } catch (error) {
+    console.error('Erro ao processar URL da imagem no carrinho:', error);
+    return 'https://via.placeholder.com/100x100?text=Sem+Imagem';
   }
 };
 
 export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, {
-    items: [],
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
   });
 
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
+
   const addToCart = (product) => {
-    dispatch({
-      type: 'ADD_TO_CART',
-      payload: {
+    setCart(currentCart => {
+      const existingItem = currentCart.find(item => item.id === product.id);
+      
+      if (existingItem) {
+        return currentCart.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+
+      return [...currentCart, {
         id: product.id,
         title: product.attributes.tituleProduto,
         price: product.attributes.precoProduto,
-        image: product.attributes.imagemPrincipal?.data?.attributes?.url,
-        quantity: 1,
-      },
+        image: getImageUrl(product),
+        quantity: 1
+      }];
     });
   };
 
   const removeFromCart = (productId) => {
-    dispatch({
-      type: 'REMOVE_FROM_CART',
-      payload: productId,
-    });
+    setCart(currentCart => currentCart.filter(item => item.id !== productId));
   };
 
-  const updateQuantity = (productId, quantity) => {
-    dispatch({
-      type: 'UPDATE_QUANTITY',
-      payload: { id: productId, quantity },
-    });
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+
+    setCart(currentCart =>
+      currentCart.map(item =>
+        item.id === productId
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
   };
 
   const clearCart = () => {
-    dispatch({
-      type: 'CLEAR_CART',
-    });
+    setCart([]);
   };
 
   const getTotal = () => {
-    return state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
   return (
-    <CartContext.Provider
-      value={{
-        cart: state.items,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        getTotal,
-      }}
-    >
+    <CartContext.Provider value={{
+      cart,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      getTotal
+    }}>
       {children}
     </CartContext.Provider>
   );

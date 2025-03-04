@@ -84,7 +84,7 @@ const PaymentPage = () => {
         console.log('Creating payment intent with amount:', amount);
         console.log('Items:', cart);
 
-        const response = await fetch('https://strapi-products.onrender.com/api/payment/create-payment-intent', {
+        const response = await fetch('https://certain-dinosaur-423c97af88.strapiapp.com/api/payment/create-payment-intent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

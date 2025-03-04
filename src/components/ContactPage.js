@@ -27,7 +27,7 @@ const ContactPage = () => {
     setStatus({ type: 'loading', message: 'Enviando mensagem...' });
 
     try {
-      const response = await fetch('https://strapi-products.onrender.com/api/contacts', {
+      const response = await fetch('https://certain-dinosaur-423c97af88.strapiapp.com/api/contacts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
