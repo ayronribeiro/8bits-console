@@ -68,3 +68,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Using the Strapi Backend
+
+If you want to use the products from my Strapi backend, you can set up the Strapi project by following these steps:
+
+1. Clone the [strapi-products repository](https://github.com/ayronribeiro/strapi-products):
+
+   ```bash
+   git clone https://github.com/ayronribeiro/strapi-products
