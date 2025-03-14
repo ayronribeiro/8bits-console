@@ -53,14 +53,12 @@ const Products = ({ showFilters = false }) => {
 
     let filtered = [...produtos];
 
-    // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(produto => 
         produto.attributes.tituleProduto.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Apply price range filter
     if (priceRange.min !== '') {
       filtered = filtered.filter(produto => 
         produto.attributes.precoProduto >= parseFloat(priceRange.min)
@@ -122,11 +120,9 @@ const Products = ({ showFilters = false }) => {
       }
       const imageUrl = produto.attributes.imagemPrincipal.data.attributes.url;
       console.log('URL original:', imageUrl);
-      // Se a URL já contém o domínio completo do Strapi Media
       if (imageUrl.includes('media.strapiapp.com')) {
         return imageUrl;
       }
-      // Se a URL começa com http mas não é do media.strapiapp.com
       if (imageUrl.startsWith('http')) {
         return imageUrl;
       }
