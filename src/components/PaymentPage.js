@@ -5,7 +5,6 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import './PaymentPage.css';
 
-// Initialize Stripe with your publishable key
 const stripePromise = loadStripe('pk_live_51QycdFB79s8Aph4o5iUv0BeIkbQ96pijh5RUvCjPiEOR7tRymFDp8tuiRnbwOqTCxNeFTOQu7AOlri2APlJ7MKLz00YHKZIwgS');
 
 const PaymentForm = ({ onSuccess, clientSecret }) => {
