@@ -9,11 +9,9 @@ const getImageUrl = (product) => {
       return 'https://via.placeholder.com/100x100?text=Sem+Imagem';
     }
     console.log('URL original no carrinho:', imageUrl);
-    // Se a URL já contém o domínio completo do Strapi Media
     if (imageUrl.includes('media.strapiapp.com')) {
       return imageUrl;
     }
-    // Se a URL começa com http mas não é do media.strapiapp.com
     if (imageUrl.startsWith('http')) {
       return imageUrl;
     }
